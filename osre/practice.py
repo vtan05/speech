@@ -8,6 +8,7 @@ from scipy import signal
 from scipy.signal import hilbert
 from scipy.stats import skew, kurtosis
 from params import params
+from dft import goertzel
 
 def mfcc(y, sr):
 
@@ -53,24 +54,63 @@ def mfcc(y, sr):
 
     return mfcc_stats
 
+
+#def ems():
+    
 if __name__ == '__main__':
     y, sr = librosa.load('test.wav', sr=params.sampling_rate)
 
     # Octave spectra and bands in time domain
-    spl, freq, xb = PyOctaveBand.octavefilter(y, sr, order=9, show=1, sigbands=1)
-    butter_filter = 
+    spl, freq, xb = PyOctaveBand.octavefilter(y, sr, order=8, show=0, sigbands=1)
+    print(len(freq))
 
+    # Butterworth Filter (4th order, 30Hz cut-off freq)
+    butter_filter = signal.butter(4, 2 * np.pi * 30, 'low', fs=sr, output='sos')
+
+    ems_stats = []
     # Store signal in bands in separated wav files
     for idx in range(len(freq)):
         #scipy.io.wavfile.write("test_"+str(round(freq[idx]))+"_Hz.wav", sr, xb[idx]/np.max(xb[idx]))
         signal = xb[idx]/np.max(xb[idx])
+
         hilbert_trans = hilbert(signal)
-        amplitude_envelope = np.abs(hilbert_trans)
+        analytic_sig = np.abs(signal + hilbert_trans)
 
-        plt.plot(amplitude_envelope)
-        plt.show()
+        imp = scipy.signal.unit_impulse(len(analytic_sig))
+        filtd = scipy.signal.sosfilt(butter_filter, imp)
 
+        env = filtd * analytic_sig
+        env = env - np.mean(env)
 
+        # Peak frequency and amplitude (0 - 10 Hz)
+        freqs, results = goertzel(env, sr, (0, 10))
+        peak_amp = np.max(np.array(results)[:,2])
+        ems_stats.append(peak_amp)
+
+        index = np.array(results)[:,2].argmax()
+        peak_freq = freqs[index]
+        ems_stats.append(peak_freq)
+        
+        # Energy from 3 - 6 Hz
+        freqs, results = goertzel(env, sr, (3, 6))
+        energy_36 = np.sum(np.abs(np.array(results)[:,2]))
+        ems_stats.append(energy_36)
+
+        # Energy from 0 - 4 Hz
+        freqs, results = goertzel(env, sr, (0, 4))
+        energy_04 = np.sum(np.abs(np.array(results)[:,2]))
+        ems_stats.append(energy_04)
+
+        # Energy from 4 - 10 Hz
+        freqs, results = goertzel(env, sr, (4, 10))
+        energy_410 = np.sum(np.abs(np.array(results)[:,2]))
+        ems_stats.append(energy_410)
+
+        # Energy Ratio between 0 - 4 Hz and 4 - 10 Hz
+        energy_ratio = energy_04 / energy_410
+        ems_stats.append(energy_ratio)
+
+    print(np.array(ems_stats).shape)
 
     # windows = []
     # for i in range(0, len(y) - params.window_length, params.window_shift):
