@@ -1,7 +1,8 @@
 import librosa
 import PyOctaveBand
+import glob
+import os
 import numpy as np
-import matplotlib.pyplot as plt
 
 from scipy import signal
 from scipy.signal import hilbert
@@ -9,8 +10,10 @@ from scipy.stats import skew, kurtosis
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+
 from params import params
 from dft import goertzel
+
 
 def mfcc(y, sr):
 
@@ -101,9 +104,8 @@ def ems(sig, sr):
     ems_stats.append(energy_ratio)   
 
     return ems_stats
-    
-if __name__ == '__main__':
-    y, sr = librosa.load('test.wav', sr=params.sampling_rate)
+       
+def extract(y, sr):
 
     windows = []
     
@@ -129,6 +131,22 @@ if __name__ == '__main__':
         windows.append(features_array)
 
     #print(np.array(windows).shape)
-    pipeline = Pipeline([('scaling', StandardScaler()), ('pca', PCA(n_components=200, whiten=True))])
-    pca = pipeline.fit_transform(np.array(windows))
-    print(pca.shape)
+    return np.array(windows)
+
+if __name__ == '__main__':
+
+    files = glob.glob(params.audio_valid_path)
+    for file in files:
+        y, sr = librosa.load(file, sr=params.sampling_rate)
+        
+        # save features as a file
+        file_path = file.replace('.wav','.npy')
+        file = os.path.basename(file_path).split('/')[-1]
+        save_file = params.features_valid_path[:-1] + file
+        print('Processing: ' + file)
+
+        feat = extract(y, sr)
+        pipeline = Pipeline([('scaling', StandardScaler()), ('pca', PCA(n_components=200, whiten=True))])
+        pca = pipeline.fit_transform(feat)
+        #print(pca.shape)
+        np.save(save_file, pca)

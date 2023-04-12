@@ -10,6 +10,12 @@ class Params(object):
         self.hamm_length = int(0.020 * self.sampling_rate)
         self.nmels = 13
         
+		# Data Path
+        self.audio_train_path = r'C:\Users\vanta\Desktop\SRNet\data\srnet\train\librispeech\*.wav'
+        self.audio_valid_path = r'C:\Users\vanta\Desktop\SRNet\data\srnet\valid\librispeech\*.wav'
+        self.features_train_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\train\.'
+        self.features_valid_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\valid\.'
+        
         # # Model
 		# self.type = 'srnet'
 		# self.model = '5'
