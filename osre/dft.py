@@ -21,6 +21,7 @@
 
 import math
 
+
 def goertzel(samples, sample_rate, *freqs):
     """
     Implementation of the Goertzel algorithm, useful for calculating individual

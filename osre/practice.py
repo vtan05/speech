@@ -30,6 +30,7 @@ def mfcc(y, sr):
     mfcc_stats = []
 
     for j in range(params.nmels):
+        
         mfcc_stats.append(np.mean(mfcc[j]))
         mfcc_stats.append(np.mean(mfcc_delta[j]))
         mfcc_stats.append(np.mean(mfcc_delta2[j]))
@@ -104,9 +105,11 @@ def ems(sig, sr):
     
 if __name__ == '__main__':
     y, sr = librosa.load('test.wav', sr=params.sampling_rate)
+    audio_len_s = float(len(y)) / sr
+    num_frames = int(round(audio_len_s * params.fps))
 
-    windows = []
-    
+    window_data = np.array([])
+
     for i in range(0, len(y) - params.window_length, params.window_shift):
         sig = y[i:i + params.window_length]
         mfcc_stats = mfcc(sig, sr)
@@ -119,16 +122,17 @@ if __name__ == '__main__':
         ems_oct_stats.extend(ems_orig)
         
         # Store signal in bands in separated wav files
-        for idx in range(len(freq)):
-            oct_sig = xb[idx]/np.max(xb[idx])
-            ems_oct = ems(oct_sig, sr)
-            ems_oct_stats.extend(ems_oct)
+        # for idx in range(len(freq)):
+        #    oct_sig = xb[idx]/np.max(xb[idx])
+        #    ems_oct = ems(oct_sig, sr)
+        #    ems_oct_stats.extend(ems_oct)
         
         features = [mfcc_stats, ems_oct_stats]
         features_array = np.concatenate(features, axis=0)
-        windows.append(features_array)
 
-    #print(np.array(windows).shape)
-    pipeline = Pipeline([('scaling', StandardScaler()), ('pca', PCA(n_components=200, whiten=True))])
-    pca = pipeline.fit_transform(np.array(windows))
-    print(pca.shape)
+        if window_data.size != 0:
+            window_data = np.vstack([window_data, features_array])
+        else:
+            window_data = np.array([features_array])
+                
+    print(window_data.shape)

@@ -1,5 +1,5 @@
-import librosa
 import PyOctaveBand
+import librosa
 import glob
 import os
 import numpy as np
@@ -7,17 +7,12 @@ import numpy as np
 from scipy import signal
 from scipy.signal import hilbert
 from scipy.stats import skew, kurtosis
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
 
 from params import params
 from dft import goertzel
 
 
-def mfcc(y, sr):
-
-    window = signal.windows.hamming(params.hamm_length)
+def mfcc(y, sr, window):
 
     # Mel-Spectrogram
     S = librosa.feature.melspectrogram(y=y, sr=sr, hop_length=params.hop_length, window=window, 
@@ -60,12 +55,10 @@ def mfcc(y, sr):
     return mfcc_stats
 
 
-def ems(sig, sr):
+def ems(sig, sr, butter_filter):
 
     ems_stats = []
 
-    butter_filter = signal.butter(4, 2 * np.pi * 30, 'low', fs=sr, output='sos')
-        
     hilbert_trans = hilbert(sig)
     analytic_sig = np.abs(sig + hilbert_trans)
 
@@ -104,36 +97,45 @@ def ems(sig, sr):
     ems_stats.append(energy_ratio)   
 
     return ems_stats
-       
-def extract(y, sr):
 
-    windows = []
+
+def extract(y, sr, window, butter_filter):
+
+    windows = np.array([])
     
     for i in range(0, len(y) - params.window_length, params.window_shift):
         sig = y[i:i + params.window_length]
-        mfcc_stats = mfcc(sig, sr)
+        mfcc_stats = mfcc(sig, sr, window)
 
         # Octave spectra and bands in time domain
         spl, freq, xb = PyOctaveBand.octavefilter(y, sr, order=8, show=0, sigbands=1)
 
         ems_oct_stats = []
-        ems_orig = ems(sig, sr)
+        ems_orig = ems(sig, sr, butter_filter)
         ems_oct_stats.extend(ems_orig)
         
         # Store signal in bands in separated wav files
         for idx in range(len(freq)):
             oct_sig = xb[idx]/np.max(xb[idx])
-            ems_oct = ems(oct_sig, sr)
+            ems_oct = ems(oct_sig, sr, butter_filter)
             ems_oct_stats.extend(ems_oct)
         
         features = [mfcc_stats, ems_oct_stats]
         features_array = np.concatenate(features, axis=0)
-        windows.append(features_array)
+        
+        if windows.size != 0:
+            windows = np.vstack([windows, features_array])
+        else:
+            windows = np.array([features_array])
 
-    #print(np.array(windows).shape)
-    return np.array(windows)
+    return windows
+
 
 if __name__ == '__main__':
+
+    # Parameters
+    window = signal.windows.hamming(params.hamm_length)
+    butter_filter = signal.butter(4, 2 * np.pi * 30, 'low', fs=params.sampling_rate, output='sos')
 
     files = glob.glob(params.audio_valid_path)
     for file in files:
@@ -145,8 +147,7 @@ if __name__ == '__main__':
         save_file = params.features_valid_path[:-1] + file
         print('Processing: ' + file)
 
-        feat = extract(y, sr)
-        pipeline = Pipeline([('scaling', StandardScaler()), ('pca', PCA(n_components=200, whiten=True))])
-        pca = pipeline.fit_transform(feat)
-        #print(pca.shape)
-        np.save(save_file, pca)
+        feat = extract(y, sr, window, butter_filter)
+
+        np.save(save_file, feat)
+

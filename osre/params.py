@@ -3,9 +3,10 @@ class Params(object):
     def __init__(self):
 
         # Audio Parameters
+        self.fps = 60.0
         self.sampling_rate = 16000
         self.window_length = int(1 * self.sampling_rate)
-        self.window_shift = int(0.1 * self.sampling_rate)
+        self.window_shift = int((self.sampling_rate / self.fps) - self.fps - 1)
         self.hop_length = int(0.010 * self.sampling_rate)
         self.hamm_length = int(0.020 * self.sampling_rate)
         self.nmels = 13
@@ -15,25 +16,12 @@ class Params(object):
         self.audio_valid_path = r'C:\Users\vanta\Desktop\SRNet\data\srnet\valid\librispeech\*.wav'
         self.features_train_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\train\.'
         self.features_valid_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\valid\.'
-        
-        # # Model
-		# self.type = 'srnet'
-		# self.model = '5'
-		# self.device = 1
 
-		# # Test
-		# self.test_audio_folder = 'srnet'
-		# self.test_audio_name = '121-121726-0008'
-
-		# # Parameters
-		# self.fps = 60.0
-		# self.sampling_rate = 16000
-		# self.srnet_win_size = int(1 * self.fps)
-
-		# self.batch_size = 64
-		# self.learning_rate = 0.00005
-		# self.num_epochs = 2000
-		# self.dataset = ['librispeech'] #'mead', 'librispeech'
+        # Model
+        self.batch_size = 64
+        self.learning_rate = 3e-6
+        self.num_epochs = 100
+        self.stop_epoch = 5
 
 		# # Dimension
 		# self.stft_dim = 513
