@@ -12,6 +12,7 @@ from sklearn.pipeline import Pipeline
 from params import params
 from dft import goertzel
 
+
 def mfcc(y, sr):
 
     window = signal.windows.hamming(params.hamm_length)
@@ -115,17 +116,17 @@ if __name__ == '__main__':
         mfcc_stats = mfcc(sig, sr)
 
         # Octave spectra and bands in time domain
-        spl, freq, xb = PyOctaveBand.octavefilter(y, sr, order=8, show=0, sigbands=1)
+        spl, freq, xb = PyOctaveBand.octavefilter(sig, sr, order=8, show=0, sigbands=1)
 
         ems_oct_stats = []
         ems_orig = ems(sig, sr)
         ems_oct_stats.extend(ems_orig)
         
         # Store signal in bands in separated wav files
-        # for idx in range(len(freq)):
-        #    oct_sig = xb[idx]/np.max(xb[idx])
-        #    ems_oct = ems(oct_sig, sr)
-        #    ems_oct_stats.extend(ems_oct)
+        for idx in range(len(freq)):
+            oct_sig = xb[idx]/np.max(xb[idx])
+            ems_oct = ems(oct_sig, sr)
+            ems_oct_stats.extend(ems_oct)
         
         features = [mfcc_stats, ems_oct_stats]
         features_array = np.concatenate(features, axis=0)

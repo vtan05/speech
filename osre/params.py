@@ -11,11 +11,17 @@ class Params(object):
         self.hamm_length = int(0.020 * self.sampling_rate)
         self.nmels = 13
         
-		# Data Path
+		# Local Data Path
         self.audio_train_path = r'C:\Users\vanta\Desktop\SRNet\data\srnet\train\librispeech\*.wav'
         self.audio_valid_path = r'C:\Users\vanta\Desktop\SRNet\data\srnet\valid\librispeech\*.wav'
         self.features_train_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\train\.'
         self.features_valid_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\valid\.'
+
+        # Server Data Path
+        # self.audio_train_path = r'/host_data/van/librispeech/train/*.wav'
+        # self.audio_valid_path = r'/host_data/van/librispeech/valid/*.wav'
+        # self.features_train_path = r'/host_data/van/librispeech/features/train/.'
+        # self.features_valid_path = r'/host_data/van/librispeech/features/valid/.'
 
         # Model
         self.batch_size = 64

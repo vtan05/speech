@@ -108,7 +108,7 @@ def extract(y, sr, window, butter_filter):
         mfcc_stats = mfcc(sig, sr, window)
 
         # Octave spectra and bands in time domain
-        spl, freq, xb = PyOctaveBand.octavefilter(y, sr, order=8, show=0, sigbands=1)
+        spl, freq, xb = PyOctaveBand.octavefilter(sig, sr, order=8, show=0, sigbands=1)
 
         ems_oct_stats = []
         ems_orig = ems(sig, sr, butter_filter)
@@ -137,17 +137,17 @@ if __name__ == '__main__':
     window = signal.windows.hamming(params.hamm_length)
     butter_filter = signal.butter(4, 2 * np.pi * 30, 'low', fs=params.sampling_rate, output='sos')
 
-    files = glob.glob(params.audio_valid_path)
+    files = glob.glob(params.audio_train_path)
     for file in files:
         y, sr = librosa.load(file, sr=params.sampling_rate)
         
         # save features as a file
         file_path = file.replace('.wav','.npy')
         file = os.path.basename(file_path).split('/')[-1]
-        save_file = params.features_valid_path[:-1] + file
-        print('Processing: ' + file)
-
-        feat = extract(y, sr, window, butter_filter)
-
-        np.save(save_file, feat)
+        save_file = params.features_train_path[:-1] + file
+        
+        if not os.path.isfile(save_file):
+            print('Processing: ' + file)
+            feat = extract(y, sr, window, butter_filter)
+            np.save(save_file, feat)
 
