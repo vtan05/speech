@@ -1,6 +1,6 @@
 import sys, os, torch
 from torch.utils.tensorboard import SummaryWriter
-#import src.srnet.data_manager as data_manager
+import data_manager as data_manager
 import model as model
 from params import params
 
@@ -26,7 +26,7 @@ class Runner(object):
     def run(self, dataloader, mode='train'):
         self.model.train() if mode == 'train' else self.model.eval()
 
-        epoch_loss = {'loss': 0.0, 'gt': 0.0, 'smooth': 0.0}
+        epoch_loss = {'gt': 0.0}
 
         for batch, (audio, pps) in enumerate(dataloader):
             # divide the consecutive frames
@@ -44,24 +44,15 @@ class Runner(object):
             # gt loss
             gt_loss = self.criterion(pred_pps, pps)
 
-            # smooth loss
-            pred_pps_1 = pred_pps[:int(pred_pps.size(0) / 2)]
-            pred_pps_2 = pred_pps[int(pred_pps.size(0) / 2):]
-            smooth_loss = self.criterion(pred_pps_1, pred_pps_2)
-
-            loss = gt_loss + 10 * smooth_loss
+            loss = gt_loss
 
             if mode == 'train':
                 loss.backward()
                 self.optimizer.step()
 
-            epoch_loss['loss'] += audio.size(0) * loss.item()
             epoch_loss['gt'] += audio.size(0) * gt_loss.item()
-            epoch_loss['smooth'] += audio.size(0) * smooth_loss.item()
 
-        epoch_loss['loss'] = epoch_loss['loss'] / (len(dataloader.dataset) * 2)
         epoch_loss['gt'] = epoch_loss['gt'] / (len(dataloader.dataset) * 2)
-        epoch_loss['smooth'] = epoch_loss['smooth'] / (len(dataloader.dataset) * 2)
 
         return epoch_loss
 
@@ -96,10 +87,10 @@ def main():
         print("saved valid loss: {}".format(min_valid_loss))
 
     # make path
-    if os.path.isdir('{}/models/{}'.format(params.root, params.type)) == False:
-        os.mkdir('{}/models/{}'.format(params.root, params.type))
-    if os.path.isdir('{}/models/{}/tensorboard'.format(params.root, params.type)) == False:
-        os.mkdir('{}/models/{}/tensorboard'.format(params.root, params.type))
+    if os.path.isdir('{}{}'.format(params.model_path, params.type)) == False:
+        os.mkdir('{}{}'.format(params.model_path, params.type))
+    if os.path.isdir('{}{}/tensorboard'.format(params.model_path, params.type)) == False:
+        os.mkdir('{}{}/tensorboard'.format(params.model_path, params.type))
 
     writer = SummaryWriter(params.tensorboard_path)
     for epoch in range(params.num_epochs):
@@ -112,7 +103,6 @@ def main():
         # writer.add_scalars('Accuracy', {'train': train_loss['accuracy'], 'valid': valid_loss['accuracy']},  epoch)
         writer.add_scalars('Loss', {'train': train_loss['loss'], 'valid': valid_loss['loss'],
                                     'train_gt': train_loss['gt'], 'valid_gt': valid_loss['gt'],
-                                    'train_smooth': train_loss['smooth'], 'valid_smooth': valid_loss['smooth']
                                     }, epoch)
 
         # Save
@@ -128,10 +118,10 @@ def main():
                         }, params.model_path)
 
             print("[Epoch %d] [Train : %.4f, %.4f] [Valid : %.4f, %.4f] --- Saved model" % (
-                epoch, train_loss['loss'], train_loss['smooth'], valid_loss['loss'], valid_loss['smooth']))
+                epoch, train_loss['loss'], valid_loss['loss']))
         else:
             print("[Epoch %d] [Train : %.4f, %.4f] [Valid : %.4f, %.4f]" % (
-                epoch, train_loss['loss'], train_loss['smooth'], valid_loss['loss'], valid_loss['smooth']))
+                epoch, train_loss['loss'], valid_loss['loss']))
 
         #runner.scheduler.step()
 
