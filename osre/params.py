@@ -25,6 +25,7 @@ class Params(object):
         self.feature_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\features\.'
         self.test_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\test\.'
         self.model_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\models\.'
+        self.tensorboard_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\models\tensorboard\.'
 
         # Server Data Path
         # self.audio_train_path = r'/host_data/van/librispeech/train/*.wav'

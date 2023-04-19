@@ -67,7 +67,7 @@ def count_parameters(model):
 
 
 def main():
-    train_loader, valid_loader = data_manager.get_dataloader(params)
+    train_loader, valid_loader = data_manager.get_dataloader()
     runner = Runner(params)
     min_valid_loss = 1000
     saved_epoch = 0

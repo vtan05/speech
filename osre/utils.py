@@ -3,6 +3,7 @@ import numpy as np
 from math import ceil
 import torch.nn.functional as F
 from sklearn.decomposition import PCA
+from params import params
 
 
 class Utils:
@@ -34,7 +35,7 @@ class Utils:
 
     @staticmethod
     def get_pps(phonemes): # phoneme per second / phoneme index : 0 ~ 51 (total number: 52)
-        fps = hparams.fps
+        fps = params.fps
         n_frame = phonemes.shape[0]
         prev_p = phonemes[0,0]
         cnt = 0 if prev_p == 51 else 1

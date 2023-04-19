@@ -1,6 +1,7 @@
 import glob
 import pickle
 import random
+import os
 import numpy as np
 
 from params import params
@@ -31,8 +32,8 @@ class SREDataset(Dataset):
         pps = np.vstack([pps_1, pps_2])
 
         # 3. Normalization
-        ds_mean_std = np.load('{}/mean_std/ds_librispeech.npy'.format(params.features_trainval_path))
-        mean, std = ds_mean_std[:params.ds_dim], ds_mean_std[params.ds_dim:]
+        ds_mean_std = np.load('{}/mean_std/ds_librispeech.npy'.format(params.features_train_path))
+        mean, std = ds_mean_std[:params.feature_dim], ds_mean_std[params.feature_dim:]
         audio_feature = (audio_feature - mean) / (std + 1e-6)
 
         return audio_feature, pps
@@ -53,8 +54,8 @@ def get_dataloader():
         phonemes = pickle.load(f)
     valid_set = SREDataset(audio_features, phonemes)
 
-    train_loader = DataLoader(train_set, batch_size=params.batch_size, num_workers=16, shuffle=True)
-    valid_loader = DataLoader(valid_set, batch_size=params.batch_size, num_workers=16, shuffle=False)
+    train_loader = DataLoader(train_set, batch_size=params.batch_size, num_workers=1, shuffle=True)
+    valid_loader = DataLoader(valid_set, batch_size=params.batch_size, num_workers=1, shuffle=False)
 
     return train_loader, valid_loader
 
@@ -72,23 +73,25 @@ def get_features(phone_files, features_trainval_path):
 
     for i, pho_path in enumerate(phone_files):
         filename = Utils.get_filename(pho_path).split("_phoneme")[0]
-        ds_data = np.load("{}/{}.npy".format(features_trainval_path, filename))
-        pho_data = np.load(pho_path)
 
-        # Implement PCA (Uncomment)
-        #ds_data = pipeline.fit_transform(ds_data)
-        #print(ds_data.shape)
+        if os.path.isfile("{}/{}.npy".format(features_trainval_path, filename)):
+            ds_data = np.load("{}/{}.npy".format(features_trainval_path, filename))
+            pho_data = np.load(pho_path)
 
-        # Get Mean & Std (Uncomment)
-        stats = np.concatenate([stats, ds_data], axis=0) if stats.size > 1 else ds_data 
+            # Implement PCA (Uncomment)
+            #ds_data = pipeline.fit_transform(ds_data)
+            #print(ds_data.shape)
 
-        ds_data, pho_data = Utils.get_sync_fr(ds_data, pho_data, "ds", "pho")
+            # Get Mean & Std (Uncomment)
+            stats = np.concatenate([stats, ds_data], axis=0) if stats.size > 1 else ds_data 
+
+            ds_data, pho_data = Utils.get_sync_fr(ds_data, pho_data, "ds", "pho")
         
-        ds_data = Utils.pad_first_last_fr(ds_data, params.srnet_win_size)
-        pho_data = Utils.pad_first_last_fr(pho_data, params.srnet_win_size)
+            ds_data = Utils.pad_first_last_fr(ds_data, params.srnet_win_size)
+            pho_data = Utils.pad_first_last_fr(pho_data, params.srnet_win_size)
 
-        ds_list.append(ds_data)
-        pho_list.append(pho_data)
+            ds_list.append(ds_data)
+            pho_list.append(pho_data)
 
     # Get Mean & Std (Uncomment)
     mean, std = np.mean(stats, axis=0), np.std(stats, axis=0)
