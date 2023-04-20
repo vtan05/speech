@@ -26,7 +26,7 @@ class Runner(object):
     def run(self, dataloader, mode='train'):
         self.model.train() if mode == 'train' else self.model.eval()
 
-        epoch_loss = {'gt': 0.0}
+        epoch_loss = {'loss': 0.0}
 
         for batch, (audio, pps) in enumerate(dataloader):
             # divide the consecutive frames
@@ -34,7 +34,7 @@ class Runner(object):
             pps = torch.cat([pps[:, 0], pps[:, 1]], dim=0) # phonemes per second
 
             audio = audio.to(self.device).float()
-            audio = audio.view(audio.size(0), 1, audio.size(1), audio.size(2))
+            audio = audio.view(audio.size(0), audio.size(1), audio.size(2))
             pps = pps.to(self.device).float()
             self.optimizer.zero_grad()
 
@@ -50,9 +50,9 @@ class Runner(object):
                 loss.backward()
                 self.optimizer.step()
 
-            epoch_loss['gt'] += audio.size(0) * gt_loss.item()
+            epoch_loss['loss'] += audio.size(0) * gt_loss.item()
 
-        epoch_loss['gt'] = epoch_loss['gt'] / (len(dataloader.dataset) * 2)
+        epoch_loss['loss'] = epoch_loss['loss'] / (len(dataloader.dataset) * 2)
 
         return epoch_loss
 
@@ -101,9 +101,7 @@ def main():
 
         # Tensorboard
         # writer.add_scalars('Accuracy', {'train': train_loss['accuracy'], 'valid': valid_loss['accuracy']},  epoch)
-        writer.add_scalars('Loss', {'train': train_loss['loss'], 'valid': valid_loss['loss'],
-                                    'train_gt': train_loss['gt'], 'valid_gt': valid_loss['gt'],
-                                    }, epoch)
+        writer.add_scalars('Loss', {'train': train_loss['loss'], 'valid': valid_loss['loss'],}, epoch)
 
         # Save
         # if min_valid_loss > valid_loss['loss']:
@@ -117,10 +115,10 @@ def main():
                         'lr': runner.learning_rate
                         }, params.model_path)
 
-            print("[Epoch %d] [Train : %.4f, %.4f] [Valid : %.4f, %.4f] --- Saved model" % (
+            print("[Epoch %d] [Train : %.4f] [Valid : %.4f] --- Saved model" % (
                 epoch, train_loss['loss'], valid_loss['loss']))
         else:
-            print("[Epoch %d] [Train : %.4f, %.4f] [Valid : %.4f, %.4f]" % (
+            print("[Epoch %d] [Train : %.4f] [Valid : %.4f]" % (
                 epoch, train_loss['loss'], valid_loss['loss']))
 
         #runner.scheduler.step()
