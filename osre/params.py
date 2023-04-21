@@ -2,6 +2,10 @@ class Params(object):
 
     def __init__(self):
 
+        # Model
+        self.type = 'osre'
+        self.device = 1
+
         # Audio Parameters
         self.fps = 60.0
         self.srnet_win_size = int(1 * self.fps)
@@ -23,7 +27,7 @@ class Params(object):
         self.features_valid_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\valid\.'
 
         self.feature_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\features\.'
-        self.test_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\test\.'
+        self.eval_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\eval\.'
         self.model_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\models\.'
         self.tensorboard_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\models\tensorboard\.'
 
@@ -33,13 +37,12 @@ class Params(object):
         # self.features_train_path = r'/host_data/van/librispeech/features/train/.'
         # self.features_valid_path = r'/host_data/van/librispeech/features/valid/.'
 
-        # Model Parameters
+        # Network Parameters
         self.type = 'osre'
         self.batch_size = 64
-        self.learning_rate = 3e-6
-        self.num_epochs = 100
+        self.learning_rate = 0.00005 # 3e-6
+        self.num_epochs = 2000 # 100
         self.stop_epoch = 5
-        self.device = 1
         self.feature_dim = 294
 
 params = Params()

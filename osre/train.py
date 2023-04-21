@@ -2,8 +2,27 @@ import sys, os, torch
 from torch.utils.tensorboard import SummaryWriter
 import data_manager as data_manager
 import model as model
+import numpy as np
 from params import params
 
+
+class EarlyStopper:
+    def __init__(self, patience=1, min_delta=0):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.min_valid_loss = np.inf
+
+    def early_stop(self, valid_loss):
+        if valid_loss < self.min_valid_loss:
+            self.min_valid_loss = valid_loss
+            self.counter = 0
+        elif valid_loss > (self.min_valid_loss + self.min_delta):
+            self.counter += 1
+            if self.counter >= self.patience:
+                return True
+        return False
+    
 
 class Runner(object):
     def __init__(self, params):
@@ -42,7 +61,7 @@ class Runner(object):
             pred_pps = self.model(audio)
 
             # gt loss
-            gt_loss = self.criterion(pred_pps, pps)
+            gt_loss = torch.sqrt(self.criterion(pred_pps, pps))
 
             loss = gt_loss
 
@@ -68,6 +87,7 @@ def count_parameters(model):
 
 def main():
     train_loader, valid_loader = data_manager.get_dataloader()
+    early_stopper = EarlyStopper(patience=5, min_delta=10)
     runner = Runner(params)
     min_valid_loss = 1000
     saved_epoch = 0
@@ -87,10 +107,10 @@ def main():
         print("saved valid loss: {}".format(min_valid_loss))
 
     # make path
-    if os.path.isdir('{}{}'.format(params.model_path, params.type)) == False:
-        os.mkdir('{}{}'.format(params.model_path, params.type))
-    if os.path.isdir('{}{}/tensorboard'.format(params.model_path, params.type)) == False:
-        os.mkdir('{}{}/tensorboard'.format(params.model_path, params.type))
+    if os.path.isdir('{}'.format(params.model_path)) == False:
+        os.mkdir('{}'.format(params.model_path))
+    if os.path.isdir('{}/tensorboard'.format(params.model_path)) == False:
+        os.mkdir('{}/tensorboard'.format(params.model_path))
 
     writer = SummaryWriter(params.tensorboard_path)
     for epoch in range(params.num_epochs):
@@ -98,6 +118,10 @@ def main():
 
         train_loss = runner.run(train_loader, 'train')
         valid_loss = runner.run(valid_loader, 'eval')
+
+        # EarlyStopping
+        if early_stopper.early_stop(valid_loss['loss']):             
+            break
 
         # Tensorboard
         # writer.add_scalars('Accuracy', {'train': train_loss['accuracy'], 'valid': valid_loss['accuracy']},  epoch)
@@ -113,7 +137,7 @@ def main():
                         'valid_loss': valid_loss['loss'],
                         'epoch': epoch,
                         'lr': runner.learning_rate
-                        }, params.model_path)
+                        }, params.model_path + 'model_2000.pth')
 
             print("[Epoch %d] [Train : %.4f] [Valid : %.4f] --- Saved model" % (
                 epoch, train_loss['loss'], valid_loss['loss']))

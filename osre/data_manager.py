@@ -32,10 +32,14 @@ class SREDataset(Dataset):
         pps = np.vstack([pps_1, pps_2])
 
         # 3. Normalization        
+
         ds_mean_std = np.load('{}/mean_std/ds_librispeech.npy'.format(params.features_train_path))
         mean, std = ds_mean_std[:params.feature_dim], ds_mean_std[params.feature_dim:]
         audio_feature = (audio_feature - mean) / (std + 1e-6)
         audio_feature = np.nan_to_num(audio_feature)
+
+        #pipeline = Pipeline([('pca', PCA(n_components=200))])
+        #audio_feature = pipeline.fit_transform(audio_feature)
 
         return audio_feature, pps
 
