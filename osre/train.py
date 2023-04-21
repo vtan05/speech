@@ -7,7 +7,7 @@ from params import params
 
 
 class EarlyStopper:
-    def __init__(self, patience=1, min_delta=0):
+    def __init__(self, patience=10, min_delta=1e-4):
         self.patience = patience
         self.min_delta = min_delta
         self.counter = 0
@@ -87,7 +87,7 @@ def count_parameters(model):
 
 def main():
     train_loader, valid_loader = data_manager.get_dataloader()
-    early_stopper = EarlyStopper(patience=5, min_delta=10)
+    #early_stopper = EarlyStopper()
     runner = Runner(params)
     min_valid_loss = 1000
     saved_epoch = 0
@@ -120,8 +120,8 @@ def main():
         valid_loss = runner.run(valid_loader, 'eval')
 
         # EarlyStopping
-        if early_stopper.early_stop(valid_loss['loss']):             
-            break
+        #if early_stopper.early_stop(valid_loss['loss']):             
+        #    break
 
         # Tensorboard
         # writer.add_scalars('Accuracy', {'train': train_loss['accuracy'], 'valid': valid_loss['accuracy']},  epoch)

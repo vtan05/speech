@@ -12,7 +12,7 @@ def eval(pho_path):
 
     with torch.no_grad():
         runner = Runner(params)
-        runner.model.load_state_dict(torch.load(params.model_path + 'model_2000.pth')['model_state_dict'])
+        runner.model.load_state_dict(torch.load(params.model_path + 'model_2000_earlystop.pth')['model_state_dict'])
 
         # ds normalize
         feature = np.load("{}/{}.npy".format(params.features_valid_path, filename))
@@ -34,7 +34,7 @@ def eval(pho_path):
         # ------------------------------------------------------------------------ #
         # Test 1) Resulting speed graph
         # ------------------------------------------------------------------------ #
-        np.savetxt('{}{}\{}.csv'.format(params.eval_path, '2000_epoch', filename), pred_pps, delimiter=",")
+        np.savetxt('{}{}\{}.csv'.format(params.eval_path, '2000_epoch_earlystop', filename), pred_pps, delimiter=",")
         # for fr in range(pred_pps.shape[0]):
         #     print("{} frame: {}".format(fr, pred_pps[fr]))
         # print("mean: {}".format(pred_pps.mean())) #regression
