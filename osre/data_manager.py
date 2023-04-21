@@ -27,7 +27,7 @@ class SREDataset(Dataset):
         pho_feature = phoneme[start_fr:start_fr + params.srnet_win_size + 1, :]
 
         # 2. Get the number of phoneme during the window
-        pps_1, pps_2 = Utils.get_pps(pho_feature[:-1]), Utils.get_pps(pho_feature[1:]) # phoneme per second
+        pps_1, pps_2 = Utils.get_pps_skipping_silence(pho_feature[:-1]), Utils.get_pps_skipping_silence(pho_feature[1:]) # phoneme per second
         #print("pps: {},".format(pps_1))
         pps = np.vstack([pps_1, pps_2])
 

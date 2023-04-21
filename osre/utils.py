@@ -34,7 +34,7 @@ class Utils:
         return padded_data
 
     @staticmethod
-    def get_pps(phonemes): # phoneme per second / phoneme index : 0 ~ 51 (total number: 52)
+    def get_pps_skipping_silence(phonemes): # phoneme per second / phoneme index : 0 ~ 51 (total number: 52)
         fps = params.fps
         n_frame = phonemes.shape[0]
         prev_p = phonemes[0,0]

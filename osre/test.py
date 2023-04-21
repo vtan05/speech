@@ -53,7 +53,7 @@ def eval(pho_path):
 
         gt = []
         for i in range(gt_phoneme.shape[0]):
-            gt_i = Utils.get_pps(gt_phoneme[i])
+            gt_i = Utils.get_pps_skipping_silence(gt_phoneme[i])
             gt.append(gt_i)
 
         test_corr, _ = pearsonr(np.squeeze(pred_pps), np.array(gt)) # return: correlation, p-value

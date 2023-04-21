@@ -137,7 +137,7 @@ def main():
                         'valid_loss': valid_loss['loss'],
                         'epoch': epoch,
                         'lr': runner.learning_rate
-                        }, params.model_path + 'model_2000.pth')
+                        }, params.model_path + 'model_{}.pth'.format(params.model))
 
             print("[Epoch %d] [Train : %.4f] [Valid : %.4f] --- Saved model" % (
                 epoch, train_loss['loss'], valid_loss['loss']))

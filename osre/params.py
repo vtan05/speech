@@ -37,8 +37,14 @@ class Params(object):
         # self.features_train_path = r'/host_data/van/librispeech/features/train/.'
         # self.features_valid_path = r'/host_data/van/librispeech/features/valid/.'
 
+        # self.pickle_train_path = r'/host_data/van/augmented_data/train/'
+        # self.pickle_valid_path = r'/host_data/van/augmented_data/valid/'
+        # self.features_train_path = r'/host_data/van/mead/train/.'
+        # self.features_valid_path = r'/host_data/van/mead/valid/.'
+
         # Network Parameters
         self.type = 'osre'
+        self.model = '2000_earlystop'
         self.batch_size = 64
         self.learning_rate = 0.00005 # 3e-6
         self.num_epochs = 2000 # 100
