@@ -2,6 +2,7 @@ import PyOctaveBand
 import librosa
 import glob
 import os, pickle
+import argparse
 import numpy as np
 
 from scipy import signal
@@ -132,13 +133,16 @@ def extract(y, sr, window, butter_filter):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_type', default='mead_train_1', type=str)
+    args = parser.parse_args()
 
     # Parameters
     window = signal.windows.hamming(params.hamm_length)
     butter_filter = signal.butter(4, 2 * np.pi * 30, 'low', fs=params.sampling_rate, output='sos')
 
     # load pkl data
-    with open('{}/{}.pkl'.format(r'C:\Users\vanta\Desktop\SRNet\data\augmented_data', 'mead_train_1'), 'rb') as f:
+    with open('{}/{}.pkl'.format(params.pickle_path, args.data_type), 'rb') as f:
         data = pickle.load(f)
 
     # extract feature

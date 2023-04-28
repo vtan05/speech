@@ -30,6 +30,7 @@ class Params(object):
         self.eval_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\data\librispeech\eval\.'
         self.model_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\models\.'
         self.tensorboard_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\models\tensorboard\.'
+        self.test_path = r'C:\Users\vanta\Desktop\SRNet\others_src\osre\test\.'
 
         # Server Data Path
         # self.audio_train_path = r'/host_data/van/librispeech/train/*.wav'
@@ -37,18 +38,17 @@ class Params(object):
         # self.features_train_path = r'/host_data/van/librispeech/features/train/.'
         # self.features_valid_path = r'/host_data/van/librispeech/features/valid/.'
 
-        # self.pickle_train_path = r'/host_data/van/augmented_data/train/'
-        # self.pickle_valid_path = r'/host_data/van/augmented_data/valid/'
+        # self.pickle_path = r'/host_data/van/augmented_data/.'
+        # self.pickle_file = 'mead_train_1'
         # self.features_train_path = r'/host_data/van/mead/train/.'
         # self.features_valid_path = r'/host_data/van/mead/valid/.'
 
         # Network Parameters
         self.type = 'osre'
-        self.model = '2000_earlystop'
+        self.model = '0'
         self.batch_size = 64
         self.learning_rate = 0.00005 # 3e-6
         self.num_epochs = 2000 # 100
-        self.stop_epoch = 5
         self.feature_dim = 294
 
 params = Params()

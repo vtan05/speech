@@ -1,4 +1,4 @@
-import sys, os, torch
+import os, torch
 from torch.utils.tensorboard import SummaryWriter
 import data_manager as data_manager
 import model as model
@@ -7,7 +7,7 @@ from params import params
 
 
 class EarlyStopper:
-    def __init__(self, patience=10, min_delta=1e-4):
+    def __init__(self, patience=25, min_delta=1e-4):
         self.patience = patience
         self.min_delta = min_delta
         self.counter = 0
@@ -39,7 +39,7 @@ class Runner(object):
             self.criterion.cuda(params.device - 1)
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        #self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=1000, gamma=0.5)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=1000, gamma=0.5)
 
 
     def run(self, dataloader, mode='train'):
@@ -121,16 +121,16 @@ def main():
 
         # EarlyStopping
         #if early_stopper.early_stop(valid_loss['loss']):             
-        #    break
+        #   break
 
         # Tensorboard
-        # writer.add_scalars('Accuracy', {'train': train_loss['accuracy'], 'valid': valid_loss['accuracy']},  epoch)
         writer.add_scalars('Loss', {'train': train_loss['loss'], 'valid': valid_loss['loss'],}, epoch)
 
         # Save
-        # if min_valid_loss > valid_loss['loss']:
-        #     min_valid_loss = valid_loss['loss']
-        if epoch % 20 == 0:
+        if min_valid_loss > valid_loss['loss']:
+
+            min_valid_loss = valid_loss['loss']
+        # if epoch % 20 == 0:
             torch.save({'model_state_dict': runner.model.state_dict(),
                         'optimizer_state_dict': runner.optimizer.state_dict(),
                         'train_loss': train_loss['loss'],
@@ -145,8 +145,8 @@ def main():
             print("[Epoch %d] [Train : %.4f] [Valid : %.4f]" % (
                 epoch, train_loss['loss'], valid_loss['loss']))
 
-        #runner.scheduler.step()
-
+        runner.scheduler.step()
+        
 
 if __name__ == '__main__':
     main()
