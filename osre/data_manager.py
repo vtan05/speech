@@ -110,18 +110,19 @@ def make_datafile():
     phone_files = []
     phone_files += glob.glob('{}/*_phoneme.npy'.format(params.phoneme_train_path))
     audio_features, phonemes = get_features(phone_files, params.features_train_path)
+    print(np.array(audio_features).shape)
 
-    with open('{}/train_librispeech.pkl'.format(params.feature_path), 'wb') as f:
-        pickle.dump(audio_features, f)
-        pickle.dump(phonemes, f)
+    # with open('{}/train_librispeech.pkl'.format(params.feature_path), 'wb') as f:
+    #     pickle.dump(audio_features, f)
+    #     pickle.dump(phonemes, f)
 
-    phone_files = []
-    phone_files += glob.glob('{}/*_phoneme.npy'.format(params.phoneme_valid_path))
-    audio_features, phonemes = get_features(phone_files, params.features_valid_path)
+    # phone_files = []
+    # phone_files += glob.glob('{}/*_phoneme.npy'.format(params.phoneme_valid_path))
+    # audio_features, phonemes = get_features(phone_files, params.features_valid_path)
 
-    with open('{}/valid_librispeech.pkl'.format(params.feature_path), 'wb') as f:
-        pickle.dump(audio_features, f)
-        pickle.dump(phonemes, f)
+    # with open('{}/valid_librispeech.pkl'.format(params.feature_path), 'wb') as f:
+    #     pickle.dump(audio_features, f)
+    #     pickle.dump(phonemes, f)
 
 if __name__ == '__main__':
     make_datafile()
